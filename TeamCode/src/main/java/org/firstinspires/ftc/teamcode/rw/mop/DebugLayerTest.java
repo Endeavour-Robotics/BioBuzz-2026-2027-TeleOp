@@ -38,7 +38,7 @@ public class DebugLayerTest extends OpMode {
         takepowers.add(0.65);
         takepowers.add(0.85);
 
-        robot.init(hardwareMap);
+        robot.init(hardwareMap, true, true, true, true);
     }
 
     @Override
@@ -64,15 +64,15 @@ public class DebugLayerTest extends OpMode {
         }
 
         if (intake) {
-            robot.take("in", 0.7);
+            robot.teleop.take("in", 0.7);
         } else {
-            robot.take("in", 0);
+            robot.teleop.take("in", 0);
         }
 
         if (outtake) {
-            robot.take("out", takepowers.get(takerange));
+            robot.teleop.take("out", takepowers.get(takerange));
         } else {
-            robot.take("out", 0);
+            robot.teleop.take("out", 0);
         }
 
         if (Math.abs(fb) < 0.05) fb = 0;
@@ -81,7 +81,7 @@ public class DebugLayerTest extends OpMode {
 
         if (debugMode && gamepad2.dpad_right) debug();
 
-        robot.drive(fb, st, cw);
+        robot.teleop.drive(fb, st, cw);
     }
 
     public void debug() {
