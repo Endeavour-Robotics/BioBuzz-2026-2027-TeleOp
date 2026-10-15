@@ -47,9 +47,9 @@ public class ManualOp_BioBuzz extends OpMode {
 
     @Override
     public void loop() {
-        fb = -gamepad1.right_stick_y; //forwards backwards; gamepad returns backwards
-        rt = gamepad1.right_stick_x; //rotate
-        cw = gamepad1.left_stick_x; //crabwalk
+        fb = -gamepad1.left_stick_y; //forwards backwards; gamepad returns backwards
+        rt = gamepad1.left_stick_x; //rotate
+        cw = gamepad1.right_stick_x; //crabwalk
 
         if (intakeMode) {
             if (gamepad2.left_bumper && gamepad2.leftBumperWasReleased()) {
@@ -104,3 +104,4 @@ public class ManualOp_BioBuzz extends OpMode {
         tm.update();
     }
 }
+//the wifi is bad here
