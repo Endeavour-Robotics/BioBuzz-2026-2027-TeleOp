@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode.rw.sys;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.*;
 
@@ -99,38 +96,46 @@ public class robot {
     }
 
     public class Auto {
-        public void drive(double speed) {
-            if (fl != null) fl.setPower(speed);
-            if (fr != null) fr.setPower(speed);
-            if (bl != null) bl.setPower(speed);
-            if (br != null) br.setPower(speed);
+        public void drive(double fb, double rt, double cw) {
+            double flSpeed = Objects.requireNonNull(kinematics.get("fl")).calculate(fb, rt, cw);
+            double frSpeed = Objects.requireNonNull(kinematics.get("fr")).calculate(fb, rt, cw);
+            double blSpeed = Objects.requireNonNull(kinematics.get("bl")).calculate(fb, rt, cw);
+            double brSpeed = Objects.requireNonNull(kinematics.get("br")).calculate(fb, rt, cw);
+
+            // Prevent limit passing //
+            double max = Math.max(Math.abs(flSpeed), Math.abs(frSpeed));
+            max = Math.max(max, Math.abs(blSpeed));
+            max = Math.max(max, Math.abs(brSpeed));
+
+            if (max > 1.0) {
+                flSpeed /= max;
+                frSpeed /= max;
+                blSpeed /= max;
+                brSpeed /= max;
+            }
+            //==========================//
+
+            if (fl != null) fl.setPower(flSpeed);
+            if (fr != null) fr.setPower(frSpeed);
+            if (bl != null) bl.setPower(blSpeed);
+            if (br != null) br.setPower(brSpeed);
         }
 
-//        public void driveToPosition(int targetTicks, double power, double timeoutSeconds) {
-//            ElapsedTime timeoutTimer = new ElapsedTime();
-//
-//            odo.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//            odo.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//
-//            timeoutTimer.reset();
-//
-//            while ( Math.abs(odo.getCurrentPosition()) < targetTicks &&
-//                    timeoutTimer.seconds() < timeoutSeconds) {
-//
-//                br.setPower(power);
-//                bl.setPower(power);
-//                fr.setPower(power);
-//                fl.setPower(power);
-//
-//                telemetry.addData("Odo Position", odo.getCurrentPosition());
-//                telemetry.addData("Time Left", "%.1f", timeoutSeconds - timeoutTimer.seconds());
-//                telemetry.update();
-//            }
-//
-//            br.setPower(0);
-//            bl.setPower(0);
-//            fr.setPower(0);
-//            fl.setPower(0);
-//        }
+        public void spin(String inout, double speed) {
+            if (inout == "in" || inout == "intake") {
+                if (in != null) in.setPower(speed);
+            }
+
+            if (inout == "out" || inout == "outtake") {
+                if (in != null) in.setPower(speed);
+            }
+        }
+    }
+
+    public void stop() {
+        if (fl != null) fl.setPower(0);
+        if (fr != null) fr.setPower(0);
+        if (bl != null) bl.setPower(0);
+        if (br != null) br.setPower(0);
     }
 }

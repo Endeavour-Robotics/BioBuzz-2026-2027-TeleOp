@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.rw.atop;
 
-import static android.os.SystemClock.sleep;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -16,12 +14,12 @@ public class AutoTest extends LinearOpMode {
     Telemetry tm;
     String string_state = "fw";
 
-    enum State {
+    enum State { // 7 represents 'and' or '&'
         WAIT_FOR_A,
         WAIT_FOR_B,
-        WAIT_FOR_X,
-        FINISHED,
-        FORWARDS
+        O7B_I7F7cR, // Out and backward to in and forward and crabwalk right
+        F7R_B7cR, // Forward and right to backward and crabwalk right
+        F_R_cR // Forward to right to crabwalk right
     }
 
     State state = State.WAIT_FOR_A;
@@ -42,37 +40,48 @@ public class AutoTest extends LinearOpMode {
         console = new Console(tm);
 
         robot.init(hardwareMap, intakeMode, outtakeMode, movementMode, odometryMode);
-        state = State.FORWARDS;
+        state = State.F_R_cR;
 
         waitForStart();
 
-        if (opModeIsActive()) {
+        while (opModeIsActive()) {
             switch (state) {
-                case FORWARDS: {
-                    robot.auto.drive(0.25);
+                case F_R_cR: {
+                    // Namespace[Movement_Example - Step 1]
+                    /* Move the robot forward, stop, and turn in place. */
+                    console.info("Current State", "F_R_cR");
+                    tm.update();
+                    robot.auto.drive(0.25, 0, 0);
                     sleep(1000);
-                    robot.auto.drive(0);
+                    robot.auto.drive(0, 0, 0);
                     sleep(500);
-                    robot.auto.drive(1);
-                    sleep(5000);
+                    robot.auto.drive(0, 0.5, 0);
+                    sleep(1000);
+                    robot.auto.drive(0, 0, 0);
+                    sleep(500);
+                    robot.auto.drive(0, 0, 0.25);
+                    sleep(1000);
+                    robot.auto.drive(0, 0, 0);
+                    /* End; Takes 4 seconds */
+                    state = State.F7R_B7cR;
                     break;
                 }
-                case WAIT_FOR_B: {
-                    console.log("State is", string_state);
-                    console.info("To exit '" + state + "', press B");
-                    if (gamepad1.b && gamepad1.bWasReleased()) {
-                        state = State.WAIT_FOR_X;
-                        string_state = "wfx";
-                    }
+                case F7R_B7cR: {
+                    console.info("Current State", "F7R_B7cR");
+                    tm.update();
+                    robot.auto.drive(0.5, 0.3, 0);
+                    sleep(1000);
+                    robot.stop();
+                    robot.auto.drive(-0.5, 0, 0.3);
                     break;
                 }
-                case WAIT_FOR_X: {
-                    console.log("State is", string_state);
-                    console.info("To exit '" + state + "', press X");
-                    if (gamepad1.x && gamepad1.xWasReleased()) {
-                        state = State.FINISHED;
-                        string_state = "f";
-                    }
+                case O7B_I7F7cR: {
+                    console.info("Current State", "F7R_B7cR");
+                    tm.update();
+                    robot.auto.spin("out", 0.5);
+                    robot.auto.drive(-0.4, 0, 0);
+                    sleep(1000);
+                    robot.stop();
                     break;
                 }
                 default: {

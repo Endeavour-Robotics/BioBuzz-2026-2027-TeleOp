@@ -23,7 +23,7 @@ public class ManualOp_BioBuzz extends OpMode {
     boolean outtakeMode = false;
     boolean movementMode = true;
     boolean odometryMode = false;
-    double deadZone = 0.05;
+    double deadZone = 0.1;
 
     // PUBLICITY VARIABLES
     double fb, rt, cw;
@@ -99,9 +99,10 @@ public class ManualOp_BioBuzz extends OpMode {
         console.h1("Debug Menu", "#DDD");
         console.info("In?" + intake);
         console.info("Out?" + outtake);
-        console.info("Takerange:" + takerange + "Takepower:" + takepowers.get(takerange));
-        console.log(String.format(Locale.ENGLISH, "Movement Values FB: %.2f | ST: %.2f | CW: %.2f", fb, rt, cw)); // Forwards|Backwards Strafe
+        console.info("Takerange:" + takerange + "Take power:" + takepowers.get(takerange));
+        console.log(String.format(Locale.ENGLISH, "Movement Values FB: %.2f | RT: %.2f | CW: %.2f", fb, rt, cw)); // Forwards|Backwards Rotate Crabwalk
         tm.update();
     }
 }
 //the wifi is bad here
+//solution: use hotspot
