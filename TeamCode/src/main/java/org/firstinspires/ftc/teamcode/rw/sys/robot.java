@@ -3,16 +3,17 @@ package org.firstinspires.ftc.teamcode.rw.sys;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
 
 import java.util.*;
 
 public class robot {
-    private DcMotor br;
-    private DcMotor bl;
-    private DcMotor fr;
-    private DcMotor fl;
-    private DcMotor in;
-    private DcMotor out;
+    // RUNTIME VARIABLES
+    private int robotTeam = 2; // 1: RW; 2: TT + Testing
+
+    private Servo lift;
+    private DcMotor br, bl, fr, fl, in, out;
     private IMU odo;
     Map<String, MotorEquation> kinematics = new HashMap<>();
 
@@ -20,11 +21,9 @@ public class robot {
     public Auto auto = new Auto();
 
     public void init(HardwareMap hwMap, boolean intakeMode, boolean outtakeMode, boolean movementMode, boolean odometryMode) {
-        // Touch (None)
-
         // Motors
         if (intakeMode) { in = hwMap.get(DcMotor.class, "Intake"); }
-        if (outtakeMode) { out = hwMap.get(DcMotor.class, "Outtake");}
+        if (outtakeMode) { out = hwMap.get(DcMotor.class, "Outtake"); lift = hwMap.get(Servo.class, "launch switch"); }
         if (odometryMode) { odo = hwMap.get(IMU.class, "imu"); }
         if (movementMode) {
             br = hwMap.get(DcMotor.class, "BackRight");
@@ -35,15 +34,21 @@ public class robot {
 
 
         if (intakeMode) { in.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); }
-        if (outtakeMode) { out.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); }
+        if (outtakeMode) { out.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);}
         if (movementMode) {
             br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-            bl.setDirection(DcMotor.Direction.REVERSE);
-            fl.setDirection(DcMotor.Direction.REVERSE);
+            if (robotTeam == 2) {
+                bl.setDirection(DcMotor.Direction.REVERSE);
+                fl.setDirection(DcMotor.Direction.REVERSE);
+            } else if (robotTeam == 1) {
+                fl.setDirection(DcMotor.Direction.REVERSE);
+                fr.setDirection(DcMotor.Direction.REVERSE);
+                br.setDirection(DcMotor.Direction.REVERSE);
+            }
 
             br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -67,18 +72,25 @@ public class robot {
             double blSpeed = Objects.requireNonNull(kinematics.get("bl")).calculate(fb, rt, cw);
             double brSpeed = Objects.requireNonNull(kinematics.get("br")).calculate(fb, rt, cw);
 
-            // Prevent limit passing //
-            double max = Math.max(Math.abs(flSpeed), Math.abs(frSpeed));
-            max = Math.max(max, Math.abs(blSpeed));
-            max = Math.max(max, Math.abs(brSpeed));
+            // Prevent one wheel from being faster than the other //
+            double maxi = Math.max(Math.abs(flSpeed), Math.abs(frSpeed));
+            maxi = Math.max(maxi, Math.abs(blSpeed));
+            maxi = Math.max(maxi, Math.abs(brSpeed));
 
-            if (max > 1.0) {
-                flSpeed /= max;
-                frSpeed /= max;
-                blSpeed /= max;
-                brSpeed /= max;
+            if (maxi > 1.0) {
+                flSpeed /= maxi;
+                frSpeed /= maxi;
+                blSpeed /= maxi;
+                brSpeed /= maxi;
             }
             //==========================//
+
+            // Add limit //
+            double max_speed = 0.7;
+            flSpeed = Range.clip(flSpeed, -max_speed, max_speed);
+            frSpeed = Range.clip(frSpeed, -max_speed, max_speed);
+            blSpeed = Range.clip(blSpeed, -max_speed, max_speed);
+            brSpeed = Range.clip(brSpeed, -max_speed, max_speed);
 
             if (fl != null) fl.setPower(flSpeed);
             if (fr != null) fr.setPower(frSpeed);
@@ -87,10 +99,10 @@ public class robot {
         }
 
         public void take(String inout, double takePower) {
-            if (inout == "in") {
-                in.setPower(takePower);
-            } else if (inout == "out") {
-                out.setPower(takePower);
+            if (inout.equals("in")) {
+                if (in != null) in.setPower(-takePower);
+            } else if (inout.equals("out")) {
+                if (out != null) out.setPower(takePower);
             }
         }
     }
@@ -122,11 +134,11 @@ public class robot {
         }
 
         public void spin(String inout, double speed) {
-            if (inout == "in" || inout == "intake") {
+            if (inout.equals("in") || inout.equals("intake")) {
                 if (in != null) in.setPower(speed);
             }
 
-            if (inout == "out" || inout == "outtake") {
+            if (inout.equals("out") || inout.equals("outtake") || /* Some people don't know */ inout.equals("outake")) {
                 if (in != null) in.setPower(speed);
             }
         }

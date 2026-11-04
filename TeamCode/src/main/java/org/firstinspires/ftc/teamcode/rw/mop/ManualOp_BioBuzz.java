@@ -23,7 +23,9 @@ public class ManualOp_BioBuzz extends OpMode {
     boolean outtakeMode = false;
     boolean movementMode = true;
     boolean odometryMode = false;
+    boolean invert_controls = false;
     double deadZone = 0.1;
+    double fb_fix = -1;
 
     // PUBLICITY VARIABLES
     double fb, rt, cw;
@@ -47,9 +49,19 @@ public class ManualOp_BioBuzz extends OpMode {
 
     @Override
     public void loop() {
-        fb = -gamepad1.left_stick_y; //forwards backwards; gamepad returns backwards
-        rt = gamepad1.left_stick_x; //rotate
-        cw = gamepad1.right_stick_x; //crabwalk
+        if (!invert_controls) {
+            fb = (fb_fix * gamepad1.left_stick_y); //forwards backwards; gamepad returns backwards
+            rt = gamepad1.right_stick_x; //rotate
+            cw = gamepad1.left_stick_x; //crabwalk
+        } else {
+            fb = (fb_fix * gamepad1.right_stick_y); //forwards backwards; gamepad returns backwards
+            rt = gamepad1.left_stick_x; //rotate
+            cw = gamepad1.right_stick_x; //crabwalk
+        }
+
+        if (Math.abs(fb) < deadZone) fb = 0;
+        if (Math.abs(rt) < deadZone) rt = 0;
+        if (Math.abs(cw) < deadZone) cw = 0;
 
         if (intakeMode) {
             if (gamepad2.left_bumper && gamepad2.leftBumperWasReleased()) {
@@ -75,19 +87,19 @@ public class ManualOp_BioBuzz extends OpMode {
             }
 
             if (gamepad2.dpad_up && gamepad2.dpadUpWasReleased() && takerange < takepowers.size() - 1) {
-                if (takerange == 3) takerange = 0;
-                else ++takerange;
+                takerange++;
+                if (takerange >= takepowers.size()) {
+                    takerange = 0;
+                }
             }
 
             if (gamepad2.dpad_down && gamepad2.dpadDownWasReleased() && takerange >= 0) {
-                if (takerange == 0) takerange = 3;
-                else --takerange;
+                takerange--;
+                if (takerange < 0) {
+                    takerange = takepowers.size() - 1;
+                }
             }
         }
-
-        if (Math.abs(fb) < deadZone) fb = 0;
-        if (Math.abs(rt) < deadZone) rt = 0;
-        if (Math.abs(cw) < deadZone) cw = 0;
 
         if ((gamepad2.dpad_right || gamepad1.dpad_right) && debugMode) debug = true;
         if (debug) debug();
@@ -104,5 +116,5 @@ public class ManualOp_BioBuzz extends OpMode {
         tm.update();
     }
 }
-//the wifi is bad here
+//the Wi-Fi is bad here
 //solution: use hotspot
