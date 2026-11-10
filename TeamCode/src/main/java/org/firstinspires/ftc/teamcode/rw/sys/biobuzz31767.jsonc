@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "configName": "rwbb1", // Read as: Robo Warriors BioBuzz 1
+    "teamNumber": "31767", // Keep as string
+    "teamName": "RoboWarriors",
+    "version": "0.0.1",
+    "game": "BIOBUZZ", // Game Name;; 2025: DECODE; 2026: BIOBUZZ
+    "year": 2026, // Add one for secondary year
+    "prod": false
+  },
+
+  "hardware": {
+    "motorConfig": {
+      "fl": ["FrontLeft", "REVERSE", "RUN_WITHOUT_ENCODER", "BRAKE"],
+      "fr": ["FrontRight", "FORWARD", "RUN_WITHOUT_ENCODER", "BRAKE"],
+      "bl": ["BackLeft", "REVERSE", "RUN_WITHOUT_ENCODER", "BRAKE"],
+      "br": ["BackRight", "FORWARD", "RUN_WITHOUT_ENCODER", "BRAKE"],
+      "in": ["Intake", "REVERSE", "RUN_WITHOUT_ENCODER", "BRAKE"],
+      "out": ["Outtake", "FORWARD", "RUN_WITHOUT_ENCODER", "FLOAT"]
+    },
+    "servoConfig": {
+      // None
+    },
+    "imuConfig": {
+      // None
+    }
+  },
+
+  "motorPowers":{
+    "speedLimits": {
+      "fl": 0.7,
+      "fr": 0.7,
+      "bl": 0.7,
+      "br": 0.7
+    },
+    "intake": [0.7],
+    "outtake": [0.45, 0.65, 0.8]
+  },
+
+  "controls": { "scheme": "joystick", "invert": false, "deadZone": 0.1 }
+}

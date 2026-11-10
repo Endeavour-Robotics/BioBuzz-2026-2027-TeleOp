@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Console;
+import org.firstinspires.ftc.teamcode.rw.sys.biobuzz_config;
 import org.firstinspires.ftc.teamcode.rw.sys.robot;
 
 @Autonomous(name="AutoTest", group="tests")
@@ -12,6 +13,7 @@ public class AutoTest extends LinearOpMode {
     private Console console;
     robot robot = new robot();
     Telemetry tm;
+    biobuzz_config config;
     String string_state = "fw";
 
     enum State { // 7 represents 'and' or '&'
@@ -39,7 +41,7 @@ public class AutoTest extends LinearOpMode {
         tm.setDisplayFormat(Telemetry.DisplayFormat.HTML);
         console = new Console(tm);
 
-        robot.init(hardwareMap, intakeMode, outtakeMode, movementMode, odometryMode);
+        config.init(hardwareMap, intakeMode, outtakeMode, movementMode, odometryMode);
         state = State.F_R_cR;
 
         waitForStart();
@@ -71,7 +73,7 @@ public class AutoTest extends LinearOpMode {
                     tm.update();
                     robot.auto.drive(0.5, 0.3, 0);
                     sleep(1000);
-                    robot.stop();
+                    robot.stop(true);
                     robot.auto.drive(-0.5, 0, 0.3);
                     break;
                 }
@@ -81,7 +83,7 @@ public class AutoTest extends LinearOpMode {
                     robot.auto.spin("out", 0.5);
                     robot.auto.drive(-0.4, 0, 0);
                     sleep(1000);
-                    robot.stop();
+                    robot.stop(true);
                     break;
                 }
                 default: {

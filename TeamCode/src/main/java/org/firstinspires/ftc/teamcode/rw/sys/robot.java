@@ -9,68 +9,35 @@ import com.qualcomm.robotcore.util.Range;
 import java.util.*;
 
 public class robot {
-    // RUNTIME VARIABLES
-    private int robotTeam = 2; // 1: RW; 2: TT + Testing
-
-    private Servo lift;
-    private DcMotor br, bl, fr, fl, in, out;
     private IMU odo;
     Map<String, MotorEquation> kinematics = new HashMap<>();
+
+    public biobuzz_config config = new biobuzz_config();
+    public DcMotor fl, fr, bl, br;
+    public DcMotor in, out;
 
     public TeleOp teleop = new TeleOp();
     public Auto auto = new Auto();
 
-    public void init(HardwareMap hwMap, boolean intakeMode, boolean outtakeMode, boolean movementMode, boolean odometryMode) {
-        // Motors
-        if (intakeMode) { in = hwMap.get(DcMotor.class, "Intake"); }
-        if (outtakeMode) { out = hwMap.get(DcMotor.class, "Outtake"); lift = hwMap.get(Servo.class, "launch switch"); }
-        if (odometryMode) { odo = hwMap.get(IMU.class, "imu"); }
-        if (movementMode) {
-            br = hwMap.get(DcMotor.class, "BackRight");
-            bl = hwMap.get(DcMotor.class, "BackLeft");
-            fr = hwMap.get(DcMotor.class, "FrontRight");
-            fl = hwMap.get(DcMotor.class, "FrontLeft");
-        }
+    public void init(biobuzz_config initializedConfig) {
+        this.config = initializedConfig;
 
-
-        if (intakeMode) { in.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); }
-        if (outtakeMode) { out.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);}
-        if (movementMode) {
-            br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-            if (robotTeam == 2) {
-                bl.setDirection(DcMotor.Direction.REVERSE);
-                fl.setDirection(DcMotor.Direction.REVERSE);
-            } else if (robotTeam == 1) {
-                fl.setDirection(DcMotor.Direction.REVERSE);
-                fr.setDirection(DcMotor.Direction.REVERSE);
-                br.setDirection(DcMotor.Direction.REVERSE);
-            }
-
-            br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
-
-        // Motor Equations
-        kinematics.put("br", (fb, rt, cw) -> fb - rt + cw);
-        kinematics.put("bl", (fb, rt, cw) -> fb + rt - cw);
-        kinematics.put("fr", (fb, rt, cw) -> fb - rt - cw);
-        kinematics.put("fl", (fb, rt, cw) -> fb + rt + cw);
+        this.fl = config.fl();
+        this.fr = config.fr();
+        this.bl = config.bl();
+        this.br = config.br();
+        this.in = config.in();
+        this.out = config.out();
     }
 
     @FunctionalInterface
     public interface MotorEquation { double calculate(double fb, double rt, double cw); }
     public class TeleOp {
         public void drive(double fb, double rt, double cw) {
-            double flSpeed = Objects.requireNonNull(kinematics.get("fl")).calculate(fb, rt, cw);
-            double frSpeed = Objects.requireNonNull(kinematics.get("fr")).calculate(fb, rt, cw);
-            double blSpeed = Objects.requireNonNull(kinematics.get("bl")).calculate(fb, rt, cw);
-            double brSpeed = Objects.requireNonNull(kinematics.get("br")).calculate(fb, rt, cw);
+            double flSpeed = Objects.requireNonNull(config.kinematics.get("fl")).calculate(fb, rt, cw);
+            double frSpeed = Objects.requireNonNull(config.kinematics.get("fr")).calculate(fb, rt, cw);
+            double blSpeed = Objects.requireNonNull(config.kinematics.get("bl")).calculate(fb, rt, cw);
+            double brSpeed = Objects.requireNonNull(config.kinematics.get("br")).calculate(fb, rt, cw);
 
             // Prevent one wheel from being faster than the other //
             double maxi = Math.max(Math.abs(flSpeed), Math.abs(frSpeed));
@@ -109,9 +76,9 @@ public class robot {
 
     public class Auto {
         public void drive(double fb, double rt, double cw) {
-            double flSpeed = Objects.requireNonNull(kinematics.get("fl")).calculate(fb, rt, cw);
-            double frSpeed = Objects.requireNonNull(kinematics.get("fr")).calculate(fb, rt, cw);
-            double blSpeed = Objects.requireNonNull(kinematics.get("bl")).calculate(fb, rt, cw);
+            double flSpeed = Objects.requireNonNull(config.kinematics.get("fl")).calculate(fb, rt, cw);
+            double frSpeed = Objects.requireNonNull(config.kinematics.get("fr")).calculate(fb, rt, cw);
+            double blSpeed = Objects.requireNonNull(config.kinematics.get("bl")).calculate(fb, rt, cw);
             double brSpeed = Objects.requireNonNull(kinematics.get("br")).calculate(fb, rt, cw);
 
             // Prevent limit passing //
@@ -139,15 +106,20 @@ public class robot {
             }
 
             if (inout.equals("out") || inout.equals("outtake") || /* Some people don't know */ inout.equals("outake")) {
-                if (in != null) in.setPower(speed);
+                if (out != null) out.setPower(speed);
             }
         }
     }
 
-    public void stop() {
+    public void stop(boolean inout) {
         if (fl != null) fl.setPower(0);
         if (fr != null) fr.setPower(0);
         if (bl != null) bl.setPower(0);
         if (br != null) br.setPower(0);
+
+        if (inout){
+            if (in != null) in.setPower(0);
+            if (out != null) out.setPower(0);
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Console;
+import org.firstinspires.ftc.teamcode.rw.sys.biobuzz_config;
 import org.firstinspires.ftc.teamcode.rw.sys.robot;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class DebugLayerTest extends OpMode {
     private Console console;
     robot robot = new robot();
     Telemetry tm;
+    biobuzz_config config;
 
     // RUNTIME VARIABLES
     boolean debugMode = true;
@@ -38,7 +40,7 @@ public class DebugLayerTest extends OpMode {
         takepowers.add(0.65);
         takepowers.add(0.85);
 
-        robot.init(hardwareMap, true, true, true, true);
+        config.init(hardwareMap, true, true, true, true);
     }
 
     @Override
